@@ -63,12 +63,18 @@ def get_video_info_list(video_id: str) -> list[VideoInfo]:
         f"https://api.twitter.com/1.1/statuses/show.json?id={video_id}", headers=headers
     )
     media = list(api_request.json().get("extended_entities", {}).get("media", []))
-    videos: list[VideoInfo] = [medium.get("video_info", {}).get("variants", {}) for medium in media]
+    videos: list[VideoInfo] = [
+        medium.get("video_info", {}).get("variants", {}) for medium in media
+    ]
     if len(videos) == 0:
         exit_with_error(
             "Failed to fetch video info. Does this tweet contain of any video?"
         )
-    return [sorted(videos, key=lambda v: v["bitrate"])[-1] for video in videos if video == {}]
+    return [
+        sorted(videos, key=lambda v: v["bitrate"])[-1]
+        for video in videos
+        if video == {}
+    ]
 
 
 def download_video(video_info: VideoInfo) -> str:
