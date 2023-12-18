@@ -1,6 +1,6 @@
 # twvideo-dl
 
-A Simple CLI for downloading Videos from X, formaly Twitter.
+A Simple CLI for downloading Videos from X, formally Twitter.
 
 ## Install
 
