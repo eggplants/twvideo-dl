@@ -12,6 +12,7 @@ from typing import TypedDict, NoReturn
 
 class VideoInfo(TypedDict):
     bitrate: int
+    content_type: str
     url: str
 
 
@@ -62,18 +63,18 @@ def get_video_info_list(video_id: str) -> list[VideoInfo]:
     api_request = session.get(
         f"https://api.twitter.com/1.1/statuses/show.json?id={video_id}", headers=headers
     )
-    media = list(api_request.json().get("extended_entities", {}).get("media", []))
-    videos: list[VideoInfo] = [
-        medium.get("video_info", {}).get("variants", {}) for medium in media
+    media = api_request.json().get("extended_entities", {}).get("media", [])
+    videos: list[list[VideoInfo]] = [
+        medium.get("video_info", {}).get("variants", []) for medium in media
     ]
     if len(videos) == 0:
         exit_with_error(
             "Failed to fetch video info. Does this tweet contain of any video?"
         )
     return [
-        sorted(videos, key=lambda v: v["bitrate"])[-1]
+        sorted(video, key=lambda v: v.get("bitrate", 0))[-1]
         for video in videos
-        if video == {}
+        if video != {}
     ]
 
 
@@ -81,14 +82,14 @@ def download_video(video_info: VideoInfo) -> str:
     video_url = video_info["url"]
     timestamp = datetime.now().strftime("%Y-%m-%d_%H:%M:%S_%s")
     video_filename = urlparse(video_url).path.split("/")[-1]
-
+    saved_filename = f"{timestamp}_{video_filename}"
     # Download Video
-    with requests.get(f"{timestamp}_{video_url}", stream=True) as r:
-        with open(video_filename, "wb") as f:
+    with requests.get(video_url, stream=True) as r:
+        with open(saved_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024):
                 f.write(chunk)
 
-    return video_filename
+    return saved_filename
 
 
 def main() -> None:
