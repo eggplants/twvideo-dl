@@ -20,7 +20,7 @@ def exit_with_error(msg: str) -> NoReturn:
     sys.exit(1)
 
 
-def get_video_info(video_id: str) -> VideoInfo:
+def get_video_info_list(video_id: str) -> list[VideoInfo]:
     headers = {
         "User-agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0",
         "accept": ";".join(
@@ -62,18 +62,13 @@ def get_video_info(video_id: str) -> VideoInfo:
     api_request = session.get(
         f"https://api.twitter.com/1.1/statuses/show.json?id={video_id}", headers=headers
     )
-    videos: list[VideoInfo] | None = (
-        api_request.json()
-        .get("extended_entities", {})
-        .get("media", [{}])[0]
-        .get("video_info", {})
-        .get("variants", {})
-    )
-    if videos is None:
+    media = list(api_request.json().get("extended_entities", {}).get("media", []))
+    videos: list[VideoInfo] = [medium.get("video_info", {}).get("variants", {}) for medium in media]
+    if len(videos) == 0:
         exit_with_error(
             "Failed to fetch video info. Does this tweet contain of any video?"
         )
-    return sorted(videos, key=lambda v: v["bitrate"])[-1]
+    return [sorted(videos, key=lambda v: v["bitrate"])[-1] for video in videos if video == {}]
 
 
 def download_video(video_info: VideoInfo) -> str:
@@ -95,8 +90,8 @@ def main() -> None:
         sys.argv[1] if len(sys.argv) == 2 else input("Please input tweet url:\n>>> ")
     )
     video_id = urlparse(video_url).path.split("/")[-1]
-    video_info = get_video_info(video_id)
-    download_video(video_info)
+    for video_info in get_video_info_list(video_id):
+        print("Saved:", download_video(video_info))
 
 
 if __name__ == "__main__":
