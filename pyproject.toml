@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "twvideo-dl"
-version = "0.0.1"
+version = "0.0.2"
 description = "A Simple CLI for downloading Videos from X, formaly Twitter"
 authors = ["eggplants <w10776e8w@yahoo.co.jp>"]
 license = "MIT"
