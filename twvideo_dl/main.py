@@ -74,7 +74,7 @@ def get_video_info_list(video_id: str) -> list[VideoInfo]:
     return [
         sorted(video, key=lambda v: v.get("bitrate", 0))[-1]
         for video in videos
-        if video != {}
+        if video != []
     ]
 
 
