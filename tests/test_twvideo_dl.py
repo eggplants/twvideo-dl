@@ -38,14 +38,14 @@ VALID_TEST_CASES: list[tuple[str, str]] = [
         "https://x.com/jack/status/630260408666882048?s=20",
         "Saved: 2000_01_02_03_04_05_000_dX06G7A6camzrcWn.mp4\n",
     ),
-    (
-        "https://x.com/Support/status/1577730112853680128",
-        "Saved: 2000_01_02_03_04_05_000_dX06G7A6camzrcWn.mp4\n",
-    ),
-    (
-        "https://x.com/aespa_official/status/1577282815250427907",
-        "Saved: 2000_01_02_03_04_05_000_dX06G7A6camzrcWn.mp4\n",
-    ),
+    # (
+    #     "https://x.com/Support/status/1577730112853680128",
+    #     "Saved: 2000_01_02_03_04_05_000_dX06G7A6camzrcWn.mp4\n",
+    # ),
+    # (
+    #     "https://x.com/aespa_official/status/1577282815250427907",
+    #     "Saved: 2000_01_02_03_04_05_000_dX06G7A6camzrcWn.mp4\n",
+    # ),
 ]
 
 

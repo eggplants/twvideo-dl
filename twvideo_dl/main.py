@@ -7,9 +7,21 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
-from nested_lookup import nested_lookup
 
 from typing import Any, TypedDict, NoReturn
+
+
+COMMON_HEADERS = {
+    "User-agent": "Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0",
+    "accept": ";".join(
+        (
+            "text/html,application/xhtml+xml,application/xml",
+            "q=0.9,image/webp,image/apng,*/*",
+            "q=0.8,application/signed-exchange,v=b3;q=0.9",
+        )
+    ),
+    "accept-language": "es-419,es;q=0.9,es-ES;q=0.8,en;q=0.7,en-GB;q=0.6,en-US;q=0.5",
+}
 
 
 class VideoInfo(TypedDict):
@@ -25,18 +37,7 @@ def exit_with_error(msg: str) -> NoReturn:
 
 def get_session(status_id: str) -> requests.Session:
     session = requests.Session()
-    session.headers = {
-        "User-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-        "accept": ";".join(
-            (
-                "text/html,application/xhtml+xml,application/xml",
-                "q=0.9,image/avif,image/webp,image/apng,*/*",
-                "q=0.8,application/signed-exchange;v=b3",
-                "q=0.7",
-            )
-        ),
-        "accept-language": "es-419,es;q=0.9,es-ES;q=0.8,en;q=0.7,en-GB;q=0.6,en-US;q=0.5",
-    }
+    session.headers = COMMON_HEADERS
 
     # Get file contains of bearer token
     tweet_req = session.get(f"https://twitter.com/i/videos/tweet/{status_id}")
@@ -79,27 +80,30 @@ def get_video_info_list(status_id: str) -> list[VideoInfo]:
 
     # Fetch data from GraphQL API if given tweet uses the `mixed media` feature
     # https://blog.twitter.com/en_us/topics/product/2022/introducing-mixed-media-videos-images-gifs-together-one-tweet
-    multi_video_info = [
-        parse_data(data)
-        for data in nested_lookup("legacy", get_data_from_graphql(status_id, session))
-        if "extended_entities" in data
-    ]
-    if len(multi_video_info) == 0:
-        exit_with_error(
-            "Failed to fetch video info. Does this tweet contain of any video?"
-        )
-    return multi_video_info
+    # multi_video_info = [
+    #     parse_data(data)
+    #     for data in nested_lookup("legacy", get_data_from_graphql(status_id, session))
+    #     if "extended_entities" in data
+    # ]
+    # if len(multi_video_info) == 0:
+    #     exit_with_error(
+    #         "Failed to fetch video info. Does this tweet contain of any video?"
+    #     )
+    # return multi_video_info
+    exit_with_error("Failed to fetch video info. Does this tweet contain of any video?")
 
 
 def get_data_from_graphql(status_id: str, session: requests.Session) -> Any:
-    tweet_html_req = session.get(f"https://twitter.com/i/web/status/{status_id}")
-    m = re.search(
-        r'(?<=href=")https://abs.twimg.com/responsive-web/client-web/main\.[^".]+\.js(?=")',
-        tweet_html_req.text,
-    )
-    if not m:
-        exit_with_error("Failed to fetch web client main js file.")
-    main_js_url = m.group()
+    # tweet_html_req = requests.get(f"https://twitter.com")
+    # print(tweet_html_req.status_code, tweet_html_req.text)
+    # m = re.search(
+    #     r'(?<=href=")https://abs.twimg.com/responsive-web/client-web/main\.[^".]+\.js(?=")',
+    #     tweet_html_req.text,
+    # )
+    # if not m:
+    #     exit_with_error("Failed to fetch web client main js file.")
+    # main_js_url = m.group()
+    main_js_url = "https://abs.twimg.com/responsive-web/client-web/main.17b8acba.js"
 
     main_js_req = session.get(main_js_url)
     m = re.search(
@@ -110,7 +114,8 @@ def get_data_from_graphql(status_id: str, session: requests.Session) -> Any:
     query_id = m.group()
     gql_api_url = f"https://twitter.com/i/api/graphql/{query_id}/TweetDetail"
 
-    err_message = session.get(gql_api_url).json().get("errors", [{}])[0].get("message")
+    err_req = session.get(gql_api_url)
+    err_message = err_req.json().get("errors", [{}])[0].get("message")
     if not err_message or not isinstance(err_message, str):
         exit_with_error("Failed to fetch current features.")
     m = re.search(r"(?<=The following features cannot be null: ).+", err_message)

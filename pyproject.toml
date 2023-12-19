@@ -27,3 +27,9 @@ requires = [
 
 [tool.poetry.scripts]
 twvideo-dl = "twvideo_dl.main:main"
+
+[tool.taskipy.tasks]
+test = "pytest --cov=twvideo_dl --cov-report=term"
+"test:ci" = "task test --cov-report=xml:cov.xml"
+lint = "pre-commit run -a"
+profile = "python -m cProfile"
