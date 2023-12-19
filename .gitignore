@@ -8,7 +8,10 @@ img/
 *.jpeg
 *.pdf
 *.png
+
+# tmp file for nano
 *.save
+*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
