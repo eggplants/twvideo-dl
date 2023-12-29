@@ -36,7 +36,7 @@
 
 </p>
 
-A Simple CLI for downloading Videos from X, formally Twitter.
+A Simple CLI for downloading Videos from X, formerly Twitter.
 
 ## Install
 
