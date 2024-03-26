@@ -1,4 +1,4 @@
-# twvideo-dl
+# Deprecated. Use [yt-dlp](https://github.com/yt-dlp/yt-dlp/pull/6957)!
 
 [![PyPI version](
   <https://badge.fury.io/py/twvideo-dl.svg>
